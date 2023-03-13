@@ -24,8 +24,9 @@ contract GodToken is ERC1363 {
      * @param symbol The symbol of the token.
      * @param _godAccount The address of the God Account.
      */
-    constructor(string memory name, string memory symbol, address _godAccount) ERC20(name, symbol) {
+    constructor(string memory name, string memory symbol, uint amountToMint, address _godAccount) ERC20(name, symbol) {
         godAccount = _godAccount;
+        _mint(msg.sender, amountToMint);
     }
 
     /**
