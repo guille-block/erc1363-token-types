@@ -25,6 +25,12 @@ jobs:
         with:
           version: nightly
 
-      - name: Run lint
+      - name: Lint
         run: npm run lint
+      
+      - name: Build
+        run: forge build
+      
+      - name: Test
+        run: forge test
 
