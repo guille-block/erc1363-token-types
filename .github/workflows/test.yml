@@ -27,6 +27,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Install forge dependencies
+        run: forge install
       
       - name: Build
         run: forge build
