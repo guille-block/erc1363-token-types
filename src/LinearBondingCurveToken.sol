@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 /// @dev The token follows a f(x) = 2x curve for simplicity
 contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
     uint256 constant LINEAR_BONDING_CURVE = 2;
-    uint256 tokenPoolAmount;
+    uint256 public tokenPoolAmount;
 
     constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {}
 
@@ -19,10 +19,14 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
      * @notice Allows users to buy LBC tokens by sending native tokens to the contract
      * @dev Calculates the required amount of LBC tokens to mint based on the current token pool and native token received, and mints them to the sender.
      */
-    function buyTokens() external payable nonReentrant {
-        uint256 tokensBought = getRequiredAmount(msg.value);
-        _mint(msg.sender, tokensBought);
-        tokenPoolAmount += tokensBought;
+    function buyTokens(uint amountToBuy) external payable nonReentrant {
+        uint256 valueRequired = getRequiredNativeTokenAmount(amountToBuy);
+        require(msg.value >= valueRequired, "NOT ENOUGH VALUE FOR THIS PURCHASE");
+        _mint(msg.sender, amountToBuy);
+        tokenPoolAmount += amountToBuy;
+        if (msg.value > valueRequired) {
+            msg.sender.call{value: msg.value - valueRequired}("0x00");
+        }
     }
 
     /**
@@ -40,11 +44,11 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
         uint256 amount,
         bytes calldata data
     ) external nonReentrant returns (bytes4) {
-        uint256 tokensSold = address(this).balance - tokenPoolAmount;
-        uint256 amountToReceive = getReceivingAmount(tokensSold);
-        _burn(address(this), tokensSold);
-        tokenPoolAmount -= tokensSold;
-        payable(spender).call{value: amountToReceive}("0x00");
+        uint256 amountToReceive = getReceivingNativeTokenAmount(amount);
+        _burn(address(this), amount);
+        tokenPoolAmount -= amount;
+        payable(sender).call{value: amountToReceive}("0x00");
+        return IERC1363Receiver.onTransferReceived.selector;
     }
 
     /**
@@ -52,7 +56,7 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
      * @param amountToBuy The amount of native tokens received
      * @return The amount of tokens to be received
      */
-    function getRequiredAmount(uint256 amountToBuy) public view returns (uint256) {
+    function getRequiredNativeTokenAmount(uint256 amountToBuy) public view returns (uint256) {
         uint256 initialSupply = totalSupply();
         uint256 initialPoolBalance = initialSupply ** LINEAR_BONDING_CURVE;
         uint256 finalPoolBalance = (initialSupply + amountToBuy) ** LINEAR_BONDING_CURVE;
@@ -65,7 +69,7 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
      * @param amountToSell The amount of tokens to be sold
      * @return The amount of native tokens to be received
      */
-    function getReceivingAmount(uint256 amountToSell) public view returns (uint256) {
+    function getReceivingNativeTokenAmount(uint256 amountToSell) public view returns (uint256) {
         uint256 initialSupply = tokenPoolAmount;
         uint256 initialPoolBalance = initialSupply ** LINEAR_BONDING_CURVE;
         uint256 finalPoolBalance = (initialSupply - amountToSell) ** LINEAR_BONDING_CURVE;

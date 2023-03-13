@@ -21,8 +21,9 @@ contract SanctioningToken is ERC1363 {
         _;
     }
 
-    constructor(string memory name, string memory symbol, address _admin) ERC20(name, symbol) {
+    constructor(string memory name, string memory symbol, uint256 amountToMint, address _admin) ERC20(name, symbol) {
         admin = _admin;
+        _mint(msg.sender, amountToMint);
     }
 
     /**
@@ -50,7 +51,7 @@ contract SanctioningToken is ERC1363 {
      * @param amount The amount of tokens being transferred.
      */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal override {
-        require(sanctionedSendAddresses[from], "SANCTIONED ADDRESS: CANT SEND FUNDS");
-        require(sanctionedRecieveAddresses[to], "SANCTIONED ADDRESS: CANT RECEIVE FUNDS");
+        require(!sanctionedSendAddresses[from], "SANCTIONED ADDRESS: CANT SEND FUNDS");
+        require(!sanctionedRecieveAddresses[to], "SANCTIONED ADDRESS: CANT RECEIVE FUNDS");
     }
 }
