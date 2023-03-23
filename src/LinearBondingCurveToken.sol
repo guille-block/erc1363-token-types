@@ -24,7 +24,7 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
         require(msg.value >= valueRequired, "NOT ENOUGH VALUE FOR THIS PURCHASE");
         tokenPoolAmount += amountToBuy;
         if (msg.value > valueRequired) {
-            msg.sender.call{value: msg.value - valueRequired}("0x00");
+            msg.sender.call{value: msg.value - valueRequired}("");
         }
         _mint(msg.sender, amountToBuy);
     }
@@ -32,7 +32,6 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
     /**
      * @inheritdoc IERC1363Receiver
      * @dev Calculates the amount of native tokens to be sent to the sender based on the amount of tokens received by the contract, and burns them.
-     * @param spender The address of the contract which initiated the transfer.
      * @param sender The address which initiated the transfer.
      * @param amount The amount of tokens being transferred.
      * @param data Additional data passed to the function.
