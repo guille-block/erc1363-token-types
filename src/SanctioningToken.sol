@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.13;
 
 import "erc1363-payable-token/contracts/token/ERC1363/ERC1363.sol";
 
@@ -11,7 +11,7 @@ contract SanctioningToken is ERC1363 {
     mapping(address => bool) private sanctionedSendAddresses;
     mapping(address => bool) private sanctionedRecieveAddresses;
 
-    address immutable admin;
+    address private immutable admin;
 
     /**
      * @dev Throws if the caller is not the contract's admin.

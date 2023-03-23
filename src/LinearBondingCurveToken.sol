@@ -19,14 +19,14 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
      * @notice Allows users to buy LBC tokens by sending native tokens to the contract
      * @dev Calculates the required amount of LBC tokens to mint based on the current token pool and native token received, and mints them to the sender.
      */
-    function buyTokens(uint amountToBuy) external payable nonReentrant {
+    function buyTokens(uint amountToBuy) external payable {
         uint256 valueRequired = getRequiredNativeTokenAmount(amountToBuy);
         require(msg.value >= valueRequired, "NOT ENOUGH VALUE FOR THIS PURCHASE");
-        _mint(msg.sender, amountToBuy);
         tokenPoolAmount += amountToBuy;
         if (msg.value > valueRequired) {
             msg.sender.call{value: msg.value - valueRequired}("0x00");
         }
+        _mint(msg.sender, amountToBuy);
     }
 
     /**
@@ -39,7 +39,7 @@ contract LinearBondingCurveToken is ERC1363, ReentrancyGuard, IERC1363Receiver {
      * @return `bytes4(keccak256("onTransferReceived(address,address,uint256,bytes)"))`
      */
     function onTransferReceived(
-        address spender,
+        address,
         address sender,
         uint256 amount,
         bytes calldata data

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.13;
 
 import "erc1363-payable-token/contracts/token/ERC1363/ERC1363.sol";
 
@@ -8,7 +8,7 @@ import "erc1363-payable-token/contracts/token/ERC1363/ERC1363.sol";
  * @dev Implementation of the GodToken contract, based on ERC1363.
  */
 contract GodToken is ERC1363 {
-    address immutable godAccount;
+    address private immutable godAccount;
 
     /**
      * @dev Modifier that only allows the God Account to call the function.
